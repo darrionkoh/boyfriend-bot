@@ -1,5 +1,5 @@
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
 TOKEN = "8211990989:AAHXzCP0griHiRlu-3gPgnx4lhJoISHeECc"
 
@@ -15,11 +15,15 @@ async def gn(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("I’m here with you ❤️")
 
-app = ApplicationBuilder().token(TOKEN).build()
+def main():
+    app = Application.builder().token(TOKEN).build()
 
-app.add_handler(CommandHandler("assure", assure))
-app.add_handler(CommandHandler("ily", ily))
-app.add_handler(CommandHandler("gn", gn))
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+    app.add_handler(CommandHandler("assure", assure))
+    app.add_handler(CommandHandler("ily", ily))
+    app.add_handler(CommandHandler("gn", gn))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 
-app.run_polling()
+    app.run_polling()
+
+if __name__ == "__main__":
+    main()
