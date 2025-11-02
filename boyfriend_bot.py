@@ -1,10 +1,13 @@
 import random
+from flask import Flask
+from threading import Thread
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+import os
 
 TOKEN = "8211990989:AAHXzCP0griHiRlu-3gPgnx4lhJoISHeECc"
 
-# --- Command: /assure ---
+# --- Bot functions (your existing ones) ---
 async def assure(update: Update, context: ContextTypes.DEFAULT_TYPE):
     messages = [
         "hii my lovee, i promise to get back to you safelyy, JUST A FEW MORE DAYS!!",
@@ -23,7 +26,6 @@ async def assure(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     await update.message.reply_text(random.choice(messages))
 
-# --- Command: /ily ---
 async def ily(update: Update, context: ContextTypes.DEFAULT_TYPE):
     messages = [
         "I LOVE YOU SOO MUCH MY PRINCESSSS",
@@ -42,7 +44,6 @@ async def ily(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     await update.message.reply_text(random.choice(messages))
 
-# --- Command: /gn ---
 async def gn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     messages = [
         "goooniii, sleep well okii and dream of me hehe",
@@ -58,7 +59,6 @@ async def gn(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     await update.message.reply_text(random.choice(messages))
 
-# --- General messages ---
 async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     messages = [
         "im prolly digging a hole rn so shag but youre always with me babyy",
@@ -77,16 +77,30 @@ async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     await update.message.reply_text(random.choice(messages))
 
-# --- Main app ---
-def main():
-    app = Application.builder().token(TOKEN).build()
+# --- Dummy Flask server so Render is happy ---
+flask_app = Flask("bot_server")
 
+@flask_app.route("/")
+def home():
+    return "Bot is running!"
+
+# --- Run Flask in separate thread ---
+def run_flask():
+    port = int(os.environ.get("PORT", 5000))
+    flask_app.run(host="0.0.0.0", port=port)
+
+# --- Main bot ---
+def main():
+    # Start Flask thread
+    Thread(target=run_flask).start()
+
+    # Start Telegram polling
+    app = Application.builder().token(TOKEN).build()
     app.add_handler(CommandHandler("assure", assure))
     app.add_handler(CommandHandler("ily", ily))
     app.add_handler(CommandHandler("gn", gn))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
-
-    app.run_polling()
+    app.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
     main()
